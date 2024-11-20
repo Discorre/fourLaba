@@ -20,8 +20,8 @@ def generate_receipt(receipt_id):
     return receipt_id, receipt_data
 
 # Генерация 1000 чеков
-with open('receipts.txt', 'w', encoding='utf-8') as file:
-    for receipt_id in range(1, 1000001):  # 1000 чеков
+with open('receiptsmini.txt', 'w', encoding='utf-8') as file:
+    for receipt_id in range(1, 101):
         receipt_id, items = generate_receipt(receipt_id)
         receipt_line = f"{receipt_id} "
         # Формируем строку для одного чека

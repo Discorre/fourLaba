@@ -1,52 +1,38 @@
-# Компилятор
+# Compiler
 CXX = g++
 
-# Флаги компиляции
-CXXFLAGS = -std=c++20 -Wall -Wextra -pthread
+# Compiler flags
+CXXFLAGS = -std=c++20 -pthread
 
-# Исходные файлы
-SRCS = zad1.cpp zad2.cpp zad3.cpp
+# Source files
+SOURCES = Zad1.cpp Zad2.cpp Zad3.cpp
 
-# Исполняемые файлы
-EXECS = zad1.exe zad2.exe zad3.exe
+# Object files
+OBJECTS = $(SOURCES:.cpp=.o)
 
-# Правило по умолчанию
-all: $(EXECS)
+# Executable names
+EXECUTABLES = zad1 zad2 zad3
 
-# Правило для сборки исполняемых файлов
-%.exe: %.cpp
-	$(CXX) $(CXXFLAGS) -o $@ $<
+# Default target
+all: $(EXECUTABLES)
 
-# Правила для запуска отдельных задач
-run1: zad1.exe
-	zad1.exe
+# Compile each source file into an object file
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-run2: zad2.exe
-	zad2.exe
+# Link object files to create the executables
+zad1: Zad1.o
+	$(CXX) $(CXXFLAGS) $^ -o $@
+	rm -f Zad1.o
 
-run3: zad3.exe
-	zad3.exe
+zad2: Zad2.o
+	$(CXX) $(CXXFLAGS) $^ -o $@
+	rm -f Zad2.o
 
-# Правило для запуска всех задач
-run_all: $(EXECS)
-	@echo Запуск задачи 1:
-	zad1.exe
-	@echo.
-	@echo Запуск задачи 2:
-	zad2.exe
-	@echo.
-	@echo Запуск задачи 3:
-	zad3.exe
+zad3: Zad3.o
+	$(CXX) $(CXXFLAGS) $^ -o $@
+	rm -f Zad3.o
 
-# Правило для очистки
+# Clean up build files
 clean:
-	rm -f /Q $(EXECS)
-
-# Правило для пересборки
-rebuild: clean all
-
-# Цель для проверки синтаксиса
-check: $(SRCS)
-	$(CXX) $(CXXFLAGS) -fsyntax-only $(SRCS)
-
-.PHONY: all run1 run2 run3 run_all clean rebuild check
+	rm -f $(EXECUTABLES)

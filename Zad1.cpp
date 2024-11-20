@@ -52,37 +52,37 @@ private:
     condition_variable cond; //переменная для уведомления потоков
 };
 
-// Тестирование Monitor
 void test_monitor(int num_threads) {
     cout << "Тестирование Monitor:" << endl;
 
-    Monitor monitor;  // создаем монитор
-    vector<thread> threads; //вектор для потоков
+    Monitor monitor; // создаем монитор
+    vector<thread> threads; // вектор для потоков
 
     auto start = chrono::high_resolution_clock::now(); // таймер начала
 
-    // Создаем потоки, которые будут работать с Monitor
+    // Создаем потоки
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(thread([i, &monitor]() {
-            monitor.enter();  // захватываем монитор
+            monitor.enter(); // захватываем монитор
             {
-              //  lock_guard<mutex> lock(mtx); 
-                cout << "Поток " << i << " работает с общим ресурсом с использованием Monitor." << endl;
+                lock_guard<mutex> lock(mtx); // защищаем вывод
+                char c = generate_random_char(); // генерируем символ
+                cout << "Поток " << i << ": " << c << " (Monitor)" << endl;
             }
-            monitor.exit();  // освобождаем монитор
-            }));
+            monitor.exit(); // освобождаем монитор
+        }));
     }
 
-    // Ожидаем завершения всех потоков
     for (auto& t : threads) {
         t.join();
     }
 
     auto end = chrono::high_resolution_clock::now(); // таймер конца
-    chrono::duration<double> duration = end - start; // время выполнения
+    chrono::duration<double> duration = end - start;
     cout << "Время работы Monitor: " << duration.count() << " секунд." << endl;
     cout << "---------------------------------" << endl;
 }
+
 
 
 //  SemaphoreSlim
@@ -128,10 +128,11 @@ void test_semaphore_slim(int num_threads) {
             sem.wait();  // Поток ожидает, пока не освободится ресурс
             {
                 lock_guard<mutex> lock(mtx); // мьютекс для вывода
-                cout << "Поток " << i << " работает с общим ресурсом с использованием SemaphoreSlim." << endl;
+                char c = generate_random_char();
+                cout << "Поток " << i << ": " << c << " (SemaphoreSlim)" << endl;
             }
             sem.release();  // Освобождаем ресурс для других потоков
-            }));
+        }));
     }
 
     // Ожидаем завершения всех потоков
@@ -145,199 +146,165 @@ void test_semaphore_slim(int num_threads) {
     cout << "---------------------------------" << endl;
 }
 
-// Тестирование мьютекса
 void test_mutex(int num_threads) {
     cout << "Тестирование мьютекса:" << endl;
 
-    vector<thread> threads; //вектор для потоков
+    vector<thread> threads;
 
-    auto start = chrono::high_resolution_clock::now(); // таймер начала
+    auto start = chrono::high_resolution_clock::now();
 
-    // Создаем потоки, которые будут работать с мьютексом
     for (int i = 0; i < num_threads; ++i) {
-        threads.push_back(thread([i]() { // создаем поток и добавляем в вектор
-            lock_guard<mutex> lock(mtx); // захватываем мьютексом вывод
-            cout << "Поток " << i << " работает с общим ресурсом с использованием мьютекса." << endl;
-            }));
+        threads.push_back(thread([i]() {
+            lock_guard<mutex> lock(mtx);
+            char c = generate_random_char();
+            cout << "Поток " << i << ": " << c << " (Мьютекс)" << endl;
+        }));
     }
 
-    // Ожидаем завершения всех потоков
     for (auto& t : threads) {
         t.join();
     }
 
-    auto end = chrono::high_resolution_clock::now(); // таймер конца
-    chrono::duration<double> duration = end - start; // вычисляем разницу таймером
-
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration = end - start;
     cout << "Время работы мьютекса: " << duration.count() << " секунд." << endl;
     cout << "---------------------------------" << endl;
 }
 
-// Тестирование семафора(библиотека)
 void test_semaphore(int num_threads) {
     cout << "Тестирование Semaphore:" << endl;
 
     vector<thread> threads;
+    counting_semaphore<3> sem(3);
 
-    auto start = chrono::high_resolution_clock::now(); // Начало замера времени
+    auto start = chrono::high_resolution_clock::now();
 
-    // Создаем семафор с ограничением на 3 потока
-    counting_semaphore<2> sem(2);
-
-    // Создаем потоки, которые будут работать с семафором
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(thread([i, &sem]() {
-            sem.acquire();  // Поток ожидает, пока не освободится место
+            sem.acquire();
             {
                 lock_guard<mutex> lock(mtx);
-                cout << "Поток " << i << " работает с общим ресурсом с использованием семафора." << endl;
+                char c = generate_random_char();
+                cout << "Поток " << i << ": " << c << " (Semaphore)" << endl;
             }
-            sem.release();  // Освобождаем место для других потоков
-            }));
+            sem.release();
+        }));
     }
 
-    // Ожидаем завершения всех потоков
     for (auto& t : threads) {
         t.join();
     }
 
-    auto end = chrono::high_resolution_clock::now(); // Конец замера времени
+    auto end = chrono::high_resolution_clock::now();
     chrono::duration<double> duration = end - start;
-    cout << "Время работы семафора: " << duration.count() << " секунд." << endl;
+    cout << "Время работы Semaphore: " << duration.count() << " секунд." << endl;
     cout << "---------------------------------" << endl;
 }
 
-// Тестирование SpinLock
 void test_spinlock(int num_threads) {
     cout << "Тестирование SpinLock:" << endl;
 
     vector<thread> threads;
 
-    auto start = chrono::high_resolution_clock::now(); // таймер начало
+    auto start = chrono::high_resolution_clock::now();
 
-    // Создаем потоки, которые будут работать с SpinLock
     for (int i = 0; i < num_threads; ++i) {
-        threads.push_back(thread([i]() { // создаем поток и добавляем в вектор
-            while (spinLock.test_and_set()) { // проверка флага блокировки и если он доступен,то устанавливаем его в True(захватываем флаг) ; постоянная проверка флага
-            }
+        threads.push_back(thread([i]() {
+            while (spinLock.test_and_set()) { /* активно ждём */ }
             {
                 lock_guard<mutex> lock(mtx);
-                cout << "Поток " << i << " работает с общим ресурсом с использованием SpinLock." << endl;
+                char c = generate_random_char();
+                cout << "Поток " << i << ": " << c << " (SpinLock)" << endl;
             }
-            spinLock.clear(); // Освобождаем SpinLock , сбрасывая флаг на False
-            }));
+            spinLock.clear();
+        }));
     }
 
-    // Ожидаем завершения всех потоков
     for (auto& t : threads) {
         t.join();
     }
 
-    auto end = chrono::high_resolution_clock::now(); // таймер конец
-    chrono::duration<double> duration = end - start; // длительность
-
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration = end - start;
     cout << "Время работы SpinLock: " << duration.count() << " секунд." << endl;
     cout << "---------------------------------" << endl;
 }
 
-// Тестирование Barrier
 void test_barrier(int num_threads) {
     cout << "Тестирование Barrier:" << endl;
 
     vector<thread> threads;
-    barrier bar(num_threads); // Блокировка, пока все потоки не достигнут барьера
+    barrier bar(num_threads);
 
-    auto start = chrono::high_resolution_clock::now(); // таймер начало
+    auto start = chrono::high_resolution_clock::now();
 
-    // Создаем потоки, которые будут работать с Barrier
     for (int i = 0; i < num_threads; ++i) {
-        threads.push_back(thread([i, &bar]() { // создаем поток и добавляем в вектор
+        threads.push_back(thread([i, &bar]() {
             {
-                lock_guard<mutex> lock(mtx); // мьютекс для вывода (ресурсы до барьера)
-                cout << "Поток " << i << " достиг барьера." << endl;
+                lock_guard<mutex> lock(mtx);
+                char c = generate_random_char();
+                cout << "Поток " << i << ": " << c << " (до Barrier)" << endl;
             }
-            bar.arrive_and_wait(); // поток дошел до барьера и ждет (как только все 3 потока дойдут до сюда,следующий ресурс откроется)
+            bar.arrive_and_wait();
             {
-                lock_guard<mutex> lock(mtx); // мьютекс для вывода( ресурсы после барьера)
-                cout << "Поток " << i << " прошел барьер." << endl;
+                lock_guard<mutex> lock(mtx);
+                char c = generate_random_char();
+                cout << "Поток " << i << ": " << c << " (после Barrier)" << endl;
             }
-            }));
+        }));
     }
 
-    // Ожидаем завершения всех потоков
     for (auto& t : threads) {
         t.join();
     }
 
-    auto end = chrono::high_resolution_clock::now(); // таймер конец
-    chrono::duration<double> duration = end - start; //длительность
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration = end - start;
     cout << "Время работы Barrier: " << duration.count() << " секунд." << endl;
     cout << "---------------------------------" << endl;
 }
 
-// Тестирование SpinWait
 void test_spinwait(int num_threads) {
     cout << "Тестирование SpinWait:" << endl;
 
     vector<thread> threads;
 
-    auto start = chrono::high_resolution_clock::now(); // таймер начало
+    auto start = chrono::high_resolution_clock::now();
 
-    // Создаем потоки, которые будут работать с SpinWait
     for (int i = 0; i < num_threads; ++i) {
-        threads.push_back(thread([i]() { // создаем поток и добавляем в вектор
-            while (spinLock.test_and_set()) { // проверка флага блокировки и если он доступен,то устанавливаем его в True(захватываем флаг) ; постоянная проверка флага
-                this_thread::yield();
+        threads.push_back(thread([i]() {
+            while (spinLock.test_and_set()) {
+                this_thread::yield(); // Уступаем другим потокам
             }
             {
-                //lock_guard<mutex> lock(mtx);
-                cout << "Поток " << i << " работает с общим ресурсом с использованием SpinWait." << endl;
+                lock_guard<mutex> lock(mtx);
+                char c = generate_random_char();
+                cout << "Поток " << i << ": " << c << " (SpinWait)" << endl;
             }
-            spinLock.clear(); // Освобождаем SpinLock , сбрасывая флаг на False
-            }));
+            spinLock.clear();
+        }));
     }
 
-    // Ожидаем завершения всех потоков
     for (auto& t : threads) {
         t.join();
     }
 
-    auto end = chrono::high_resolution_clock::now(); // таймер конец
-    chrono::duration<double> duration = end - start; // длительность
-
-    cout << "Время работы SpinLock: " << duration.count() << " секунд." << endl;
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration = end - start;
+    cout << "Время работы SpinWait: " << duration.count() << " секунд." << endl;
     cout << "---------------------------------" << endl;
 }
 
 
+
 int main() {
-    system("chcp 65001");
-    cout << "Запуск потоков, генерирующих случайные символы:" << endl;
+    //cout << "Запуск потоков, генерирующих случайные символы:" << endl;
 
     const int num_threads = 8; // количество потоков
     vector<thread> threads; // вектор для потоков
 
-    // Создаем потоки для генерации случайных символов
-    for (int i = 0; i < num_threads; ++i) {
-        threads.push_back(thread([i]() { // создаем поток и добавляем в вектор
-            for (int j = 0; j < 3; ++j) {
-                char c = generate_random_char(); // генерируем случайный символ
-                {
-                    lock_guard<mutex> lock(mtx);// захватываем мьютексом вывод
-                    cout << "Поток " << i << ": " << c << endl;
-                }
-                this_thread::sleep_for(chrono::milliseconds(3000));// задержка
-            }
-            }));
-    }
-
-    // Ожидаем завершения всех потоков
-    for (auto& t : threads) {
-        t.join();
-    }
-
-    cout << "Завершение работы всех потоков." << endl;
-    cout << "---------------------------------" << endl;
+    //cout << "Завершение работы всех потоков." << endl;
+    //cout << "---------------------------------" << endl;
 
     // Тестируем примитивы
     test_mutex(num_threads);
