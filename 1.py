@@ -9,6 +9,9 @@ products = [
     ("Манго", 2.8), ("Фейхоа", 3.2), ("Персик", 1.6), ("Апельсин", 2.1)
 ]
 
+print("Начинается генерация чеков...")
+print("Чеки могут загружаться очень долго...")
+
 # Функция для генерации случайных товаров для чека
 def generate_receipt(receipt_id):
     num_items = random.randint(1, 5)  # Чек будет содержать от 1 до 5 товаров
@@ -19,8 +22,17 @@ def generate_receipt(receipt_id):
         receipt_data.append((product, price, quantity))
     return receipt_id, receipt_data
 
-# Генерация 1000 чеков
-with open('receiptsmini.txt', 'w', encoding='utf-8') as file:
+# Генерация 10 чеков
+with open('receiptsUltraMini.txt', 'w', encoding='utf-8') as file:
+    for receipt_id in range(1, 11):
+        receipt_id, items = generate_receipt(receipt_id)
+        receipt_line = f"{receipt_id} "
+        # Формируем строку для одного чека
+        receipt_line += ", ".join([f"{product} {price} {quantity}" for product, price, quantity in items])
+        file.write(receipt_line + "\n")
+
+# Генерация 100 чеков
+with open('receiptsMini.txt', 'w', encoding='utf-8') as file:
     for receipt_id in range(1, 101):
         receipt_id, items = generate_receipt(receipt_id)
         receipt_line = f"{receipt_id} "
@@ -28,4 +40,22 @@ with open('receiptsmini.txt', 'w', encoding='utf-8') as file:
         receipt_line += ", ".join([f"{product} {price} {quantity}" for product, price, quantity in items])
         file.write(receipt_line + "\n")
 
-print("Файл receipts.txt с 1000 чеками успешно создан!")
+# Генерация 1000000 чеков
+with open('receiptsMacro.txt', 'w', encoding='utf-8') as file:
+    for receipt_id in range(1, 1000001):
+        receipt_id, items = generate_receipt(receipt_id)
+        receipt_line = f"{receipt_id} "
+        # Формируем строку для одного чека
+        receipt_line += ", ".join([f"{product} {price} {quantity}" for product, price, quantity in items])
+        file.write(receipt_line + "\n")
+
+# Генерация 5000000 чеков
+with open('receiptsUltraMacro.txt', 'w', encoding='utf-8') as file:
+    for receipt_id in range(1, 5_000_001):
+        receipt_id, items = generate_receipt(receipt_id)
+        receipt_line = f"{receipt_id} "
+        # Формируем строку для одного чека
+        receipt_line += ", ".join([f"{product} {price} {quantity}" for product, price, quantity in items])
+        file.write(receipt_line + "\n")
+
+print("Файлы с чеками успешно созданы!")

@@ -37,6 +37,8 @@ public:
         for (const auto& receipt : receipts) {
             processReceipt(receipt); // Обрабатываем каждый чек по порядку
         }
+        std::cout << std::endl;
+        printResults(); // Выводим результаты
     }
 
     // Многопоточная обработка данных
@@ -78,6 +80,8 @@ public:
                 productReceipts[product].insert(productReceipts[product].end(), receipts.begin(), receipts.end()); // Объединяем данные о чеках
             }
         }
+        std::cout << std::endl;
+        printResults();
     }
 
     // Функция для обработки одного чека (однопоточная версия)
@@ -145,7 +149,7 @@ std::vector<Receipt> loadReceiptsFromFile(const std::string& filename) {
 int main() {
 
     // Загружаем данные о чеках из файла
-    std::vector<Receipt> receipts = loadReceiptsFromFile("receipts.txt");
+    std::vector<Receipt> receipts = loadReceiptsFromFile("receiptsUltraMini.txt");
 
     SalesProcessor processor(receipts);
 
