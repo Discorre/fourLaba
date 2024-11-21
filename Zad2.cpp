@@ -148,6 +148,7 @@ std::vector<Receipt> loadReceiptsFromFile(const std::string& filename) {
 
 int main() {
 
+
     // Загружаем данные о чеках из файла
     std::vector<Receipt> receipts = loadReceiptsFromFile("receiptsUltraMini.txt");
 

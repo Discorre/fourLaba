@@ -117,7 +117,7 @@ private:
 void test_semaphore_slim(int num_threads) {
     cout << "Тестирование SemaphoreSlim:" << endl;
 
-    SemaphoreSlim sem(3);  // Семафор с максимумом 3 потоков
+    SemaphoreSlim sem(1);
     vector<thread> threads; //вектор для потоков
 
     auto start = chrono::high_resolution_clock::now(); // таймер начала
